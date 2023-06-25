@@ -7,16 +7,20 @@ let package = Package(
     name: "SwiftRapidJSON",
     products: [
       .library(name: "SwiftRapidJSON",
-               targets: ["SwiftRapidJSON"])
+               targets: ["SwiftRapidJSONCxx", "SwiftRapidJSON"])
     ],
     dependencies: [
     ],
     targets: [
         .target(
             name: "SwiftRapidJSON",
+            dependencies: ["SwiftRapidJSONCxx"]),
+        .target(
+            name: "SwiftRapidJSONCxx",
             dependencies: [],
-            path: "Sources/SwiftRapidJSON",
+            path: "Sources/SwiftRapidJSONCxx",
             cxxSettings: [
               .headerSearchPath("../../rapidjson/include")])
-    ]
+    ],
+    cxxLanguageStandard: .cxx17
 )
