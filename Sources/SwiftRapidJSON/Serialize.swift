@@ -66,68 +66,86 @@ public class SrjWriter {
         SrjString(srjEncoder, value)
     }
 
-    public func injectIntoObject(_ value: [String : Any]) {
-        if !inObject {
-            error = "Illegal call to addIn: must be inside object"
-            return
+    private func writeOneValue(_ a: Any, forKey key: String?) -> Bool {
+        switch ObjectIdentifier(type(of: a)) {
+        case ObjectIdentifier(Int.self):
+            if let v = a as? Int {
+                write(v, forKey: key)
+            }
+            return true
+        case ObjectIdentifier(String.self):
+            if let v = a as? String {
+                write(v, forKey: key)
+            }
+            return true
+        case ObjectIdentifier(Bool.self):
+            if let v = a as? Bool {
+                write(v, forKey: key)
+            }
+            return true
+        case ObjectIdentifier(Double.self):
+            if let v = a as? Double {
+                write(v, forKey: key)
+            }
+            return true
+        case ObjectIdentifier([Any].self):
+            if let v = a as? [Any] {
+                write(v, forKey: key)
+            }
+            return true
+        case ObjectIdentifier([String : Any].self):
+            if let v = a as? [String: Any] {
+                write(v, forKey: key)
+            }
+            return true
+        default:
+            ()
         }
 
-        for key in value.keys.sorted(by: { $0 < $1 }) {
-            guard let dvalue = value[key] else { continue }
-            
-            if let v = dvalue as? Int {
-                write(v, forKey: key)
-            }
-            else if let v = dvalue as? Bool {
-                write(v, forKey: key)
-            }
-            else if let v = dvalue as? String {
-                write(v, forKey: key)
-            }
-            else if let v = dvalue as? Double {
-                write(v, forKey: key)
-            }
-            else if let v = dvalue as? [String : Any] {
-                write(v, forKey: key)
-            }
-            else if let v = dvalue as? [Any] {
-                write(v, forKey: key)
-            }
-            else {
-                let tdescr = type(of: dvalue)
-                error = "Unable to write value of type \(tdescr) under key '\(key)'"
-            }
+        if let v = a as? Int {
+            write(v, forKey: key)
+            return true
         }
+        else if let v = a as? Bool {
+            write(v, forKey: key)
+            return true
+        }
+        else if let v = a as? String {
+            write(v, forKey: key)
+            return true
+        }
+        else if let v = a as? Double {
+            write(v, forKey: key)
+            return true
+        }
+        else if let v = a as? [String : Any] {
+            write(v, forKey: key)
+            return true
+        }
+        else if let v = a as? [Any] {
+            write(v, forKey: key)
+            return true
+        }
+        return false
     }
+
     
     public func write(_ value: [String : Any], forKey key: String? = nil) {
         writeObject(forKey: key) {
-            injectIntoObject(value)
+            for key in value.keys.sorted(by: { $0 < $1 }) {
+                guard let dvalue = value[key] else { continue }
+                if !writeOneValue(dvalue, forKey: key) {
+                    let tdescr = type(of: dvalue)
+                    error = "Unable to write value of type \(tdescr) under key '\(key)'"
+                }
+            }
         }
     }
     
     public func write(_ value: [Any], forKey key: String? = nil) {
         writeArray(forKey: key) {
             for a in value {
-                if let v = a as? Int {
-                    write(v)
-                }
-                else if let v = a as? Bool {
-                    write(v)
-                }
-                else if let v = a as? String {
-                    write(v)
-                }
-                else if let v = a as? Double {
-                    write(v)
-                }
-                else if let v = a as? [String : Any] {
-                    write(v)
-                }
-                else if let v = a as? [Any] {
-                    write(v)
-                }
-                else {
+                if !writeOneValue(a, forKey: nil) {
                     let tdescr = type(of: a)
                     error = "Unable to write value of type \(tdescr)"
                 }
@@ -174,43 +192,4 @@ public class SrjWriter {
     deinit {
         SrjDestroyEncoder(srjEncoder)
     }
-}
-
-public func doTest1() {
-    let writer = SrjWriter()
-    let d1: [String : Any] = ["negative" : -187,
-                              "name" : ["abc", 18, 31.145, false],
-                              "subDict" : ["sub1" : "foo",
-                                           "sub2" : "bar"]]
-    writer.writeObject {
-        writer.write(32, forKey: "abc")
-        writer.write("plugh", forKey: "ick")
-        writer.write(d1, forKey: "nested")
-
-        writer.writeObject(forKey: "subObject") {
-            writer.write(-187, forKey: "negative")
-            writer.write("abc", forKey: "name")
-            writer.writeNull(forKey: "nullval")
-        }
-        writer.writeArray(forKey: "many") {
-            writer.write(123)
-            writer.write("blah")
-            writer.write(false)
-            writer.write(3.134)
-            writer.writeArray {
-                writer.write("abc")
-                writer.write("xyz")
-                writer.writeNull()
-                writer.write(d1)
-            }
-        }
-    }
-    
-    do {
-        let result = try writer.output()
-        print(result)
-    } catch {
-        print("oops: \(error)")
-    }
-    
 }
