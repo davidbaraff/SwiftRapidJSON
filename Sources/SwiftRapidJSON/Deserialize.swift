@@ -191,6 +191,7 @@ public func srj_parse_error(_ ptr: UnsafeMutableRawPointer, _ value: UnsafeMutab
     parser(ptr).error(String(cString: value))
 }
 
+/*
 public func runTest(_ input: String) {
     var pc = ParserContext();
     let now = Date()
@@ -213,3 +214,5 @@ public func runTest(_ input: String) {
         print(pc.errorDescription)
     }
 }
+*/
+
