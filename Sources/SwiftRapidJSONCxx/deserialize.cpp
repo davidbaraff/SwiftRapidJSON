@@ -1,3 +1,5 @@
+#if false
+
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <string>
 #include <functional>
@@ -92,4 +94,6 @@ bool deserialize_json_from_string(void* context, char const* input) {
 
     return true;
 }
+
+#endif
 

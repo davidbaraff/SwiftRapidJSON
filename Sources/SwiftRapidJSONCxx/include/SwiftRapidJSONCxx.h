@@ -1,6 +1,8 @@
 #include <stdbool.h>
 
+/*
 bool deserialize_json_from_string(void* context, char const* input);
+*/
 
 void* SrjCreateEncoder();
 void SrjDestroyEncoder(void* ptr);
