@@ -25,6 +25,14 @@ public class SrjWriter {
     let srjEncoder = SrjCreateEncoder()
     var inObjectStack = [false]
     
+    static public func encode(_ any: Any) throws -> Data {
+        let writer = SrjWriter()
+        guard writer.writeOneValue(any, forKey: nil) else {
+            throw SrjError("Unable to encode value of type '\(type(of: any))'")
+        }
+        return try writer.output()
+    }
+    
     public init() {
         
     }
@@ -102,11 +110,11 @@ public class SrjWriter {
             ()
         }
 
-        if let v = a as? Int {
+        if let v = a as? Bool {
             write(v, forKey: key)
             return true
         }
-        else if let v = a as? Bool {
+        else if let v = a as? Int {
             write(v, forKey: key)
             return true
         }
@@ -184,6 +192,18 @@ public class SrjWriter {
         }
         
         return String(cString: SrjGetOutput(srjEncoder))
+    }
+
+    public func output() throws -> Data {
+        guard error.isEmpty else {
+            throw SrjError(error)
+        }
+        
+        var len: CInt = 0
+        guard let bytes = SrjGetUnsignedOutput(srjEncoder, &len) else {
+            throw SrjError("SrcGetUnsignedOutput() returned a null pointer")
+        }
+        return Data(bytes: bytes, count: Int(len))
     }
 
     var inObject: Bool { inObjectStack.last == true }
