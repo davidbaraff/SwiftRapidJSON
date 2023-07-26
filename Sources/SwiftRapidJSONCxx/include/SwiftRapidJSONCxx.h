@@ -7,6 +7,7 @@ bool deserialize_json_from_string(void* context, char const* input);
 void* SrjCreateEncoder();
 void SrjDestroyEncoder(void* ptr);
 char const* SrjGetOutput(void* ptr);
+unsigned char const* SrjGetUnsignedOutput(void* ptr, int*);
 void SrjStartArray(void* ptr);
 
 void SrjEndArray(void* ptr);
