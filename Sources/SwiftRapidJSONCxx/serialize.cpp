@@ -23,9 +23,12 @@ struct SrjEncoder {
         json_writer.EndObject();
     }
     
-    char const* output() {
+    char const* output(int* len = NULL) {
         if (outputCache.empty()) {
             outputCache = stringBuffer.GetString();
+        }
+        if (len) {
+            *len = int(outputCache.length());
         }
         return outputCache.c_str();
     }
@@ -54,6 +57,10 @@ extern "C" void SrjDestroyEncoder(void* ptr) {
 
 extern "C" char const* SrjGetOutput(void* ptr) {
     return encoder(ptr)->output();
+}
+
+extern "C" unsigned char const* SrjGetUnsignedOutput(void* ptr, int* len) {
+    return reinterpret_cast<unsigned char const*>(encoder(ptr)->output(len));
 }
 
 extern "C" void SrjStartArray(void* ptr) {
